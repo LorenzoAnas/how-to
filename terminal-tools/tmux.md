@@ -1,5 +1,3 @@
----
-
 ## 📌 **What is tmux?**
 
 **tmux** (Terminal MUltipleXer) is a powerful tool that allows you to manage multiple terminal sessions within a single terminal window or remote session. It helps you keep your terminal organized, lets sessions persist even if you disconnect, and improves productivity when working with command-line interfaces.

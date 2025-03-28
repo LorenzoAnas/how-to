@@ -13,9 +13,9 @@ For many users, the easiest way to install Docker is to use Ubuntu’s own packa
    sudo apt update
    ```
 
-2. **Install Docker:**
+2. **Install Docker and Docker-Compose:**
    ```bash
-   sudo apt install docker.io -y
+   sudo apt install docker.io -y sudo apt install docker-compose -y
    ```
 
 After installing Docker, you can run Docker commands without needing to prefix them with sudo by adding your user to the “docker” group. Here’s how to do it:

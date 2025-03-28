@@ -18,12 +18,30 @@ For many users, the easiest way to install Docker is to use Ubuntu’s own packa
    sudo apt install docker.io -y
    ```
 
-3. **Enable and start the Docker service:**
+After installing Docker, you can run Docker commands without needing to prefix them with sudo by adding your user to the “docker” group. Here’s how to do it:
+
+1. **Add Your User to the Docker Group:**  
+   Run the following command (replace `$(whoami)` with your username if needed):  
+   ```bash
+   sudo usermod -aG docker $(whoami)
+   ```
+
+2. **Log Out and Log Back In:**  
+   This ensures your session is updated with the new group membership. Alternatively, you can reboot your system.
+
+3. **Verify:**  
+   Run a test command such as:  
+   ```bash
+   docker run hello-world
+   ```  
+   If everything is set up correctly, Docker should run the command without requiring sudo.
+
+4. **Enable and start the Docker service:**
    ```bash
    sudo systemctl enable --now docker
    ```
 
-4. **Verify the installation:**
+5. **Verify the installation:**
    ```bash
    sudo docker run hello-world
    ```

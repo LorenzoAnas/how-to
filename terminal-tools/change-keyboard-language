@@ -1,0 +1,17 @@
+
+   ```bash
+   sudo nano /etc/default/keyboard
+   ```
+   You might see entries like these:
+   ```
+   XKBMODEL="pc105"
+   XKBLAYOUT="us"
+   XKBVARIANT=""
+   XKBOPTIONS=""
+   ```
+   Change the values as needed (for example, change `XKBLAYOUT="us"` to `XKBLAYOUT="gb"` for a British layout). Save the file, then apply changes with:
+   ```bash
+   sudo setupcon
+   ```
+
+These steps should change your keyboard input layout on Ubuntu Server.

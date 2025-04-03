@@ -35,6 +35,68 @@ You should now see two nodes (one master and one worker).
 
 ---
 
+## Common Issues and Troubleshooting
+
+### Problem: Raspberry Pi node stuck during `k3s` join or node not appearing
+**Symptoms:**
+- `k3s-agent` fails to start
+- Node doesn't show up in `kubectl get nodes`
+- `journalctl -u k3s-agent` shows errors such as `Node password rejected`, or `invalid token format`
+
+**Solutions:**
+
+#### 1. Ensure architecture compatibility
+Master node (VM) is likely x86, Raspberry Pi is ARM. Ensure Docker images and Kubernetes deployments support both.
+
+#### 2. Bridged networking
+Make sure your VM is using **Bridged Adapter** mode so it's reachable from the Raspberry Pi on the same LAN. NAT won't work properly for `k3s` cluster communication.
+
+#### 3. Windows Firewall blocking port 6443
+If the master node is hosted in a VirtualBox VM on Windows:
+- Allow ICMP (ping) and port 6443 TCP in the Windows Firewall
+- Add custom inbound rules in "Windows Defender Firewall with Advanced Security"
+
+#### 4. Existing kubelet process is blocking ports
+Run:
+```bash
+sudo lsof -i :10250
+sudo lsof -i :10255
+```
+If ports are occupied (e.g. by Snap's kubelet), remove the Snap version:
+```bash
+sudo snap stop kubelet
+sudo snap remove kubelet
+```
+Then verify the ports are free.
+
+#### 5. Duplicate hostname or node-password issue
+You might see errors like:
+```
+Node password rejected, duplicate hostname or contents of '/etc/rancher/node/password' may not match server node-passwd entry
+```
+**Fix:**
+- Assign a unique hostname:
+```bash
+sudo hostnamectl set-hostname rpi-worker-1
+```
+- Clean up old credentials:
+```bash
+sudo rm -rf /etc/rancher/node /var/lib/rancher/k3s
+```
+- Relaunch the agent:
+```bash
+sudo /usr/local/bin/k3s agent \
+  --server https://<MASTER_IP>:6443 \
+  --token <TOKEN> \
+  --with-node-id
+```
+
+#### 6. Remove zombie nodes from the cluster
+If a failed registration left a "NotReady" node in the cluster, remove it from the master with:
+```bash
+kubectl delete node <NODE_NAME>
+```
+
 ## 2. Converting Your Docker Compose Setup to Kubernetes
 
 Your original Docker Compose file defines three services:

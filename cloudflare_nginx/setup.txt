@@ -1,0 +1,129 @@
+# 🌐 Secure Self-Hosting via Cloudflare Tunnel + Nginx Proxy Manager
+
+**No port forwarding · Full HTTPS · LAN-aware proxying**
+
+---
+
+## ✅ Prerequisites
+
+* Domain added to [Cloudflare](https://dash.cloudflare.com) (Free plan is fine)
+* Linux machine (any distro) with:
+
+  * Docker & Docker Compose
+  * Access to Cloudflare account from a browser
+
+---
+
+## 1. 🛠️ Install `cloudflared` (manual `.deb` method)
+
+Download and install the latest release:
+
+```bash
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo dpkg -i cloudflared-linux-amd64.deb
+cloudflared --version
+```
+
+---
+
+## 2. 🔐 Authenticate with Cloudflare
+
+```bash
+cloudflared tunnel login
+```
+
+> Open the given link in a browser (on another device if headless) and authorize access to your domain.
+
+---
+
+## 3. 🚇 Create and configure your tunnel
+
+Create the tunnel:
+
+```bash
+cloudflared tunnel create my-tunnel
+```
+
+Create a config file at `~/.cloudflared/config.yml`:
+
+```yaml
+tunnel: my-tunnel
+credentials-file: /home/youruser/.cloudflared/my-tunnel.json
+
+ingress:
+  - hostname: yourdomain.xyz
+    service: http://localhost:81  # or a LAN IP + port
+  - service: http_status:404
+```
+
+---
+
+## 4. 🌐 Connect tunnel to DNS
+
+```bash
+cloudflared tunnel route dns my-tunnel yourdomain.xyz
+```
+
+This creates a proxied CNAME in your Cloudflare dashboard.
+
+---
+
+## 5. 🚀 Start the tunnel
+
+Test manually:
+
+```bash
+cloudflared tunnel run my-tunnel
+```
+
+For persistence:
+
+```bash
+sudo cloudflared service install
+```
+
+---
+
+## 6. ⚙️ Deploy Nginx Proxy Manager (NPM)
+
+Example `docker-compose.yml`:
+
+```yaml
+version: '3'
+services:
+  npm:
+    image: jc21/nginx-proxy-manager
+    ports:
+      - "81:81"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    restart: always
+```
+
+Start it:
+
+```bash
+docker compose up -d
+```
+
+Access it via:
+
+```
+http://yourdomain.xyz:81
+```
+
+---
+
+## 7. 🔁 Configure Proxy Hosts in NPM
+
+* Domain: `yourdomain.xyz` or subdomains
+* Forward IP: LAN IP or localhost
+* Port: whatever your internal service uses (e.g., 9000, 3000, etc.)
+* SSL:
+
+  * Use **DNS Challenge**
+  * Select **Cloudflare**
+  * Enter API token (requires setting a password if you registered via Google)
+
+
